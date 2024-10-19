@@ -49,4 +49,16 @@ router.beforeEach(to => {
   }
 })
 
+// If user is logged in, redirect to feed
+router.beforeEach(to => {
+  if (
+    (to.name === 'login' || to.name === 'register') &&
+    client?.authStore.token
+  ) {
+    return {
+      path: '/feed',
+    }
+  }
+})
+
 export default router
