@@ -2,11 +2,9 @@
 import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
 import client from '@/pocketbase'
-import { computed, ref } from 'vue'
-import Menubar from 'primevue/menubar'
+import { ref } from 'vue'
 import Button from 'primevue/button'
 import pocketBaseLogo from '@/assets/svg/logos-pocket-base.svg'
-import type { MenuItem } from 'primevue/menuitem'
 
 // Init the store
 const userStore = useUserStore()
@@ -15,26 +13,7 @@ const userStore = useUserStore()
 const router = useRouter()
 
 const isUserLoggedIn = ref(!!client.authStore.token)
-
-const items = computed<MenuItem[]>(() => [
-  {
-    label: 'Home',
-    icon: 'pi pi-fw pi-home',
-    url: '/',
-  },
-  {
-    label: 'Feed',
-    icon: 'pi pi-fw pi-book',
-    url: '/feed',
-    visible: isUserLoggedIn.value,
-  },
-  {
-    label: 'New Post',
-    icon: 'pi pi-fw pi-plus',
-    url: '/posts/new',
-    visible: isUserLoggedIn.value,
-  },
-])
+const isMobileMenuOpen = ref(false)
 
 const logoutUser = () => {
   // Manual reset because Pinia using the composition API does not support the $reset function
@@ -49,44 +28,104 @@ const logoutUser = () => {
 </script>
 
 <template>
-  <Menubar :model="items">
-    <template #start>
+  <nav
+    class="flex flex-wrap justify-between items-center dark:border-zinc-600 shadow-sm p-2 border-b"
+  >
+    <!-- Logo -->
+    <div class="flex flex-shrink-0 items-center mr-6">
       <img :src="pocketBaseLogo" alt="PocketBase Logo" class="w-8 h-8" />
-    </template>
-    <template #end>
-      <div class="flex items-center gap-2">
-        <Button
-          v-if="isUserLoggedIn"
-          as="router-link"
-          to="/profile"
-          text
-          size="large"
-          v-tooltip.left="'Profile'"
-          aria-label="Profile"
-          severity="secondary"
-          icon="pi pi-fw pi-user"
-        />
-        <Button
-          v-if="!isUserLoggedIn"
-          as="router-link"
-          to="/login"
-          outlined
-          v-tooltip.left="'Login'"
-          label="Login"
-          severity="secondary"
-          icon="pi pi-fw pi-sign-in"
-        />
-        <Button
-          v-if="isUserLoggedIn"
-          @click="logoutUser"
-          v-tooltip.left="'Logout'"
-          text
-          size="large"
-          aria-label="Logout"
-          severity="secondary"
-          icon="pi pi-fw pi-sign-out"
-        />
+    </div>
+
+    <!-- Mobile menu button -->
+    <div class="block md:hidden">
+      <Button
+        @click="isMobileMenuOpen = !isMobileMenuOpen"
+        icon="pi pi-bars"
+        class="p-button-plain p-button-text"
+        aria-label="Menu"
+      />
+    </div>
+
+    <!-- Navigation links -->
+    <div
+      :class="[
+        'w-full',
+        'md:flex',
+        'md:items-center',
+        'md:w-auto',
+        'md:grow',
+        isMobileMenuOpen ? 'block' : 'hidden',
+      ]"
+    >
+      <div
+        class="flex md:flex-row flex-col md:items-center gap-2 mt-2 md:mt-0 md:grow"
+      >
+        <!-- Left-side navigation -->
+        <div
+          class="flex md:flex-row flex-col md:items-center gap-2 md:place-self-start"
+        >
+          <Button
+            v-if="isUserLoggedIn"
+            as="router-link"
+            to="/"
+            text
+            label="Home"
+            severity="secondary"
+            icon="pi pi-fw pi-home"
+          />
+          <Button
+            v-if="isUserLoggedIn"
+            as="router-link"
+            to="/feed"
+            text
+            label="Feed"
+            severity="secondary"
+            icon="pi pi-fw pi-book"
+          />
+          <Button
+            v-if="isUserLoggedIn"
+            as="router-link"
+            to="/posts/new"
+            text
+            label="New Post"
+            severity="secondary"
+            icon="pi pi-fw pi-plus"
+          />
+        </div>
+
+        <!-- Right-side navigation -->
+        <div class="flex md:flex-row flex-col md:items-center gap-2 md:ml-auto">
+          <Button
+            v-if="isUserLoggedIn"
+            as="router-link"
+            to="/profile"
+            text
+            v-tooltip.left="'Profile'"
+            label="Profile"
+            severity="secondary"
+            icon="pi pi-fw pi-user"
+          />
+          <Button
+            v-if="!isUserLoggedIn"
+            as="router-link"
+            to="login"
+            outlined
+            v-tooltip.left="'Login'"
+            label="Login"
+            severity="secondary"
+            icon="pi pi-fw pi-sign-in"
+          />
+          <Button
+            v-if="isUserLoggedIn"
+            @click="logoutUser"
+            v-tooltip.left="'Logout'"
+            text
+            aria-label="Logout"
+            severity="secondary"
+            icon="pi pi-fw pi-sign-out"
+          />
+        </div>
       </div>
-    </template>
-  </Menubar>
+    </div>
+  </nav>
 </template>
