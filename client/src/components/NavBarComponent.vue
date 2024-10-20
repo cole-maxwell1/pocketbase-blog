@@ -1,32 +1,3 @@
-<script setup lang="ts">
-import { useUserStore } from '@/stores/user'
-import { useRouter } from 'vue-router'
-import client from '@/pocketbase'
-import { ref } from 'vue'
-import Button from 'primevue/button'
-import pocketBaseLogo from '@/assets/svg/logos-pocket-base.svg'
-
-// Init the store
-const userStore = useUserStore()
-
-// Router composable
-const router = useRouter()
-
-const isUserLoggedIn = ref(!!client.authStore.token)
-const isMobileMenuOpen = ref(false)
-
-const logoutUser = () => {
-  // Manual reset because Pinia using the composition API does not support the $reset function
-  userStore.clear()
-  // Remove the PocketBase token
-  client.authStore.clear()
-  // Redirect to the login page
-
-  isUserLoggedIn.value = false
-  router.push({ path: '/' })
-}
-</script>
-
 <template>
   <nav
     class="flex flex-wrap justify-between items-center dark:border-zinc-600 shadow-sm p-2 border-b"
@@ -101,7 +72,7 @@ const logoutUser = () => {
             to="/profile"
             text
             v-tooltip.left="'Profile'"
-            label="Profile"
+            :label="`Hi, ${firstName}`"
             severity="secondary"
             icon="pi pi-fw pi-user"
           />
@@ -129,3 +100,36 @@ const logoutUser = () => {
     </div>
   </nav>
 </template>
+
+<script setup lang="ts">
+import { useUserStore } from '@/stores/user'
+import { useRouter } from 'vue-router'
+import client from '@/pocketbase'
+import { ref } from 'vue'
+import Button from 'primevue/button'
+import pocketBaseLogo from '@/assets/svg/logos-pocket-base.svg'
+
+// Init the store
+const userStore = useUserStore()
+
+// Router composable
+const router = useRouter()
+
+const isUserLoggedIn = ref(!!client.authStore.token)
+const isMobileMenuOpen = ref(false)
+const firstName = ref(
+  client.authStore.model?.firstName[0].toUpperCase() +
+    client.authStore.model?.firstName.slice(1),
+)
+
+const logoutUser = () => {
+  // Manual reset because Pinia using the composition API does not support the $reset function
+  userStore.clear()
+  // Remove the PocketBase token
+  client.authStore.clear()
+  // Redirect to the login page
+
+  isUserLoggedIn.value = false
+  router.push({ path: '/' })
+}
+</script>
