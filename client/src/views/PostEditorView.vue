@@ -132,6 +132,30 @@
               </span>
             </template>
           </Editor>
+           <!-- Tag Selector -->
+           <MultiSelect
+            v-model="selectedTags"
+            :options="tags"
+            optionLabel="name"
+            dataKey="id"
+            placeholder="Select Tags"
+            class="w-full"
+            :filter="true"
+            filter-icon="pi pi-tag"
+            display="chip"
+            :loading="isLoadingTags"
+            @filter="onFilter"
+          >
+            <template #emptyfilter="">
+              <div class="p-3">
+                <Button
+                  :label="`Create Tag: ${filterValue}`"
+                  @click="createTag(filterValue )"
+                  class="p-button-text"
+                />
+              </div>
+            </template>
+          </MultiSelect>
           <div class="inline-flex justify-end items-center">
             <Button
               :label="hasPostId ? 'Update Post' : 'Create Post'"
@@ -151,6 +175,7 @@ import Editor from 'primevue/editor'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import FloatLabel from 'primevue/floatlabel'
+import MultiSelect from 'primevue/multiselect'
 import client from '@/pocketbase'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -162,16 +187,63 @@ const postId = route.params.postId as string
 const title = ref<string>('')
 const content = ref<string>('')
 
+const isLoadingTags = ref<boolean>(false)
+const selectedTags = ref<any[]>([]) // Array to hold selected tags
+const tags = ref<any[]>([]) // Array to hold all available tags
+  const filterValue = ref('');
+
+
 onMounted(async () => {
+  // Load existing tags
+  isLoadingTags.value = true
+  const result = await client.collection('tags').getFullList()
+  tags.value = result
+  isLoadingTags.value = false
+
   if (hasPostId) {
-    const post = await client.collection('posts').getOne(postId)
+    const post = await client.collection('posts').getOne(postId, {
+      expand: 'tags',
+    })
     title.value = post.title
     content.value = post.content
+    if (post.expand && post.expand.tags) {
+      selectedTags.value = post.expand.tags
+    }
   }
 })
 
+import type { MultiSelectFilterEvent } from 'primevue/multiselect';
+
+function onFilter(event: MultiSelectFilterEvent) {
+  filterValue.value = event.value;
+}
+
+async function createTag(tagName: string) {
+  // Check if tag already exists
+  const existingTag = tags.value.find(
+    (tag) => tag.name.toLowerCase() === tagName.toLowerCase()
+  )
+  if (existingTag) {
+    // Add to selectedTags if not already selected
+    if (!selectedTags.value.some((tag) => tag.id === existingTag.id)) {
+      selectedTags.value.push(existingTag)
+    }
+  } else {
+    try {
+      // Create new tag in 'tags' collection
+      const newTag = await client.collection('tags').create({ name: tagName })
+      // Add to tags list
+      tags.value.push(newTag)
+      // Add to selectedTags
+      selectedTags.value.push(newTag)
+    } catch (error) {
+      console.error('Error creating tag:', error)
+    }
+  }
+}
+
 async function submitPost() {
-  console.log(title.value, content.value)
+  const tagIds = selectedTags.value.map((tag) => tag.id)
 
   try {
     if (hasPostId) {
@@ -179,6 +251,7 @@ async function submitPost() {
         title: title.value,
         content: content.value,
         userId: client.authStore?.model?.id,
+        tags: tagIds,
       })
       router.push({ name: 'post-view', params: { postId: post.id } })
     } else {
@@ -186,8 +259,8 @@ async function submitPost() {
         title: title.value,
         content: content.value,
         userId: client.authStore?.model?.id,
+        tags: tagIds,
       })
-      console.log(newPost)
       router.push({ name: 'post-view', params: { postId: newPost.id } })
     }
   } catch (error) {
