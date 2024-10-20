@@ -178,14 +178,17 @@ async function submitPost() {
       const post = await client.collection('posts').update(postId, {
         title: title.value,
         content: content.value,
+        userId: client.authStore?.model?.id,
       })
       router.push({ name: 'post-view', params: { postId: post.id } })
     } else {
-      const post = await client.collection('posts').create({
+      const newPost = await client.collection('posts').create({
         title: title.value,
         content: content.value,
+        userId: client.authStore?.model?.id,
       })
-      router.push({ name: 'post-view', params: { postId: post.id } })
+      console.log(newPost)
+      router.push({ name: 'post-view', params: { postId: newPost.id } })
     }
   } catch (error) {
     console.error(error)
