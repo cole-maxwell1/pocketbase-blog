@@ -31,10 +31,31 @@ const router = createRouter({
       component: () => import('../views/FeedView.vue'),
     },
     {
-      path: '/posts/new',
-      name: 'new-post',
+      path: '/profile',
+      name: 'profile',
       meta: { requiresAuth: true },
-      component: () => import('../views/NewPostView.vue'),
+      component: () => import('../views/ProfileView.vue'),
+    },
+    {
+      path: '/posts',
+      meta: { requiresAuth: true },
+      children: [
+        {
+          path: 'new',
+          name: 'new-post',
+          component: () => import('../views/PostEditorView.vue'),
+        },
+        {
+          path: ':postId',
+          name: 'post-view',
+          component: () => import('../views/PostView.vue'),
+        },
+        {
+          path: ':postId/edit',
+          name: 'edit-post',
+          component: () => import('../views/PostEditorView.vue'),
+        },
+      ],
     },
   ],
 })
