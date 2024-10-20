@@ -45,7 +45,6 @@
 </template>
 
 <script setup lang="ts">
-import { useUserStore } from '@/stores/user'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import client from '@/pocketbase'
@@ -54,12 +53,11 @@ import FloatLabel from 'primevue/floatlabel'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
 import Button from 'primevue/button'
+import { useToast } from 'primevue/usetoast'
 
-// Init the store
-const userStore = useUserStore()
-
-// Router composable
 const router = useRouter()
+
+const toast = useToast()
 
 // Local reactive variables
 const email = ref('')
@@ -74,13 +72,16 @@ const authUser = async () => {
       .authWithPassword(email.value, password.value)
 
     if (userData) {
-      userStore.userID = userData.record.id
-      userStore.username = userData.record.profile?.username
-      userStore.userProfileID = userData.record.profile?.id
       router.push({ path: '/' })
     }
   } catch (error) {
     console.log(error)
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'Invalid email or password',
+      life: 5000,
+    })
   }
 }
 </script>

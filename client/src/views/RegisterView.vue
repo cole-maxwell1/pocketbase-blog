@@ -1,13 +1,6 @@
 <template>
   <main class="flex flex-col justify-center items-center h-screen">
     <Card>
-      <template v-if="errorOccurred" #header>
-        <div class="px-4 pt-4">
-          <Message closable severity="error">
-            {{ errorMessage }}
-          </Message>
-        </div>
-      </template>
       <template #title>
         <h1>Register an Account</h1>
       </template>
@@ -107,7 +100,6 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
 import client from '@/pocketbase'
 import FloatLabel from 'primevue/floatlabel'
@@ -116,12 +108,10 @@ import Divider from 'primevue/divider'
 import InputText from 'primevue/inputtext'
 import Card from 'primevue/card'
 import Button from 'primevue/button'
-import Message from 'primevue/message'
-
-// Init the store for user
-const userStore = useUserStore()
+import { useToast } from 'primevue/usetoast'
 
 const router = useRouter()
+const toast = useToast()
 
 const form = ref({
   firstName: '',
@@ -132,12 +122,8 @@ const form = ref({
   passwordConfirm: '',
 })
 
-const errorOccurred = ref(false)
-const errorMessage = ref('')
-
 // Function to create a new user
 async function createUser() {
-  errorOccurred.value = false
   try {
     if (validateInput()) {
       // Create new user
@@ -163,9 +149,13 @@ async function createUser() {
       alert("Password doesn't match")
     }
   } catch (error: unknown) {
-    errorOccurred.value = true
-    errorMessage.value = 'Could not create user. Please try again.'
     console.log(error)
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'Could not register user. Please try again.',
+      life: 3000,
+    })
   }
 }
 
@@ -173,17 +163,20 @@ async function createUser() {
 async function authUser() {
   try {
     // Authenticate the user via email and password
-    const userData = await client
+    await client
       ?.collection('users')
       .authWithPassword(form.value.email, form.value.password)
-    if (userData) {
-      userStore.userID = userData.record.id
-      userStore.username = userData.record.profile?.username
-      userStore.userProfileID = userData.record.profile?.id
-      router.push({ path: '/' })
-    }
+
+    router.push({ path: '/' })
   } catch (error) {
-    console.log(error)
+    console.error(error)
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'Could not authenticate user. Please try again.',
+      life: 3000,
+    })
+    router.push({ path: '/login' })
   }
 }
 

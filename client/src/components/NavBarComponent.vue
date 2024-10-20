@@ -102,15 +102,11 @@
 </template>
 
 <script setup lang="ts">
-import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
 import client from '@/pocketbase'
 import { ref } from 'vue'
 import Button from 'primevue/button'
 import pocketBaseLogo from '@/assets/svg/logos-pocket-base.svg'
-
-// Init the store
-const userStore = useUserStore()
 
 // Router composable
 const router = useRouter()
@@ -123,8 +119,6 @@ const firstName = ref(
 )
 
 const logoutUser = () => {
-  // Manual reset because Pinia using the composition API does not support the $reset function
-  userStore.clear()
   // Remove the PocketBase token
   client.authStore.clear()
   // Redirect to the login page

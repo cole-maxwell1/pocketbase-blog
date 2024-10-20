@@ -6,7 +6,6 @@ import router from './router'
 import PrimeVue from 'primevue/config'
 import Aura from '@primevue/themes/aura'
 import { definePreset } from '@primevue/themes'
-import { createPinia } from 'pinia'
 import Tooltip from 'primevue/tooltip'
 import 'primeicons/primeicons.css'
 import Editor from 'primevue/editor'
@@ -47,9 +46,6 @@ app.use(PrimeVue, {
     },
   },
 })
-
-const pinia = createPinia()
-app.use(pinia)
 
 app.directive('tooltip', Tooltip)
 
