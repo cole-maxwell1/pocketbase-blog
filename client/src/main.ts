@@ -11,6 +11,8 @@ import Tooltip from 'primevue/tooltip'
 import 'primeicons/primeicons.css'
 import Editor from 'primevue/editor'
 import type Quill from 'quill'
+import ConfirmationService from 'primevue/confirmationservice'
+import ToastService from 'primevue/toastservice'
 
 const app = createApp(App)
 
@@ -66,5 +68,8 @@ app.directive('tooltip', Tooltip)
     }
   }
 }
+
+app.use(ConfirmationService)
+app.use(ToastService)
 
 app.mount('#app')

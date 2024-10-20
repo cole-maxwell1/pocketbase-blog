@@ -2,6 +2,8 @@
 import NavBarComponent from '@/components/NavBarComponent.vue'
 import { RouterView } from 'vue-router'
 import { useRoute } from 'vue-router'
+import Toast from 'primevue/toast'
+import ConfirmDialog from 'primevue/confirmdialog'
 
 const route = useRoute()
 </script>
@@ -11,6 +13,8 @@ const route = useRoute()
     <NavBarComponent
       v-if="route.name !== 'login' && route.name !== 'register'"
     />
+    <Toast />
+    <ConfirmDialog></ConfirmDialog>
     <RouterView v-slot="{ Component }">
       <transition
         mode="out-in"
