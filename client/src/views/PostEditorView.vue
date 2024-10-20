@@ -178,6 +178,9 @@ import FloatLabel from 'primevue/floatlabel'
 import MultiSelect from 'primevue/multiselect'
 import client from '@/pocketbase'
 import { useRoute, useRouter } from 'vue-router'
+import { useToast } from 'primevue/usetoast'
+
+const toast = useToast()
 
 const route = useRoute()
 const router = useRouter()
@@ -261,9 +264,21 @@ async function submitPost() {
         userId: client.authStore?.model?.id,
         tags: tagIds,
       })
+      toast.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Post saved successfully',
+        life: 3000,
+      })
       router.push({ name: 'post-view', params: { postId: newPost.id } })
     }
   } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'An error occurred while saving the post',
+      life: 3000,
+    })
     console.error(error)
   }
 }

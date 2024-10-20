@@ -1,5 +1,5 @@
 <template>
-  <div class="p-6 overflow-auto">
+  <div class="p-6 overflow-auto w-full">
     <ButtonGroup v-if="isUserPost">
       <Button
         as="router-link"
@@ -14,7 +14,7 @@
         label="Delete"
         severity="secondary"
         icon="pi pi-fw pi-trash"
-        @click="confirm2"
+        @click="deletePostConfirm"
       />
     </ButtonGroup>
     <div class="flex flex-col gap-1 mb-1">
@@ -32,6 +32,7 @@
       </p>
     </div>
     <article v-html="content" id="post-content"></article>
+    <PostComments :post-id="postId"></PostComments>
   </div>
 </template>
 
@@ -43,6 +44,7 @@ import ButtonGroup from 'primevue/buttongroup'
 import Button from 'primevue/button'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
+import PostComments from '@/components/PostComments.vue'
 
 const confirm = useConfirm()
 const toast = useToast()
@@ -82,7 +84,7 @@ async function deletePost() {
   router.push({ name: 'home' })
 }
 
-const confirm2 = () => {
+const deletePostConfirm = () => {
   confirm.require({
     message:
       'Are you sure you want to delete this post? This action cannot be undone.',

@@ -10,7 +10,7 @@
       </div>
     </template>
     <template #content>
-      <p class="m-0">{{ post.content.slice(0, 100) }}...</p>
+      <p class="m-0">{{ snippet }}</p>
     </template>
     <template #footer>
       <div class="flex flex-col gap-1">
@@ -19,8 +19,9 @@
             outlined
             size="small"
             icon="pi pi-arrow-right"
-            aria-label="Read More"
+            label="Read"
             v-tooltip.left="'Read More'"
+            icon-pos="right"
             as="router-link"
             :to="{ name: 'post-view', params: { postId: post.id } }"
           />
@@ -43,7 +44,8 @@
 <script setup lang="ts">
 import Card from 'primevue/card'
 import Button from 'primevue/button'
-import Tag from 'primevue/tag';
+import Tag from 'primevue/tag'
+import { computed } from 'vue'
 
 interface Post {
   id: string
@@ -63,5 +65,32 @@ interface Props {
   post: Post
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
+
+const snippet = computed(() => {
+  const parser = new DOMParser()
+
+  const doc = parser.parseFromString(props.post.content, 'text/html')
+
+  const firstParagraph = doc.querySelector('p')
+
+  let snippetContent = ''
+  if (firstParagraph) {
+    snippetContent = firstParagraph.innerHTML
+
+    // Optionally, truncate the content if it's too long
+    const maxLength = 200 // Customize the length as needed
+    if (snippetContent.length > maxLength) {
+      // Remove any trailing punctuation or whitespace from the end of the string
+      snippetContent = snippetContent.replace(
+        /[.,\/#!$%\^&\*;:{}=\-_`~()\s]+$/,
+        '',
+      )
+
+      // Truncate the string and add an ellipsis
+      snippetContent = snippetContent.substring(0, maxLength) + '...'
+    }
+  }
+  return snippetContent
+})
 </script>
