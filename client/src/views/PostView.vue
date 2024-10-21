@@ -1,6 +1,6 @@
 <template>
-  <div class="p-6 overflow-auto w-full">
-    <ButtonGroup v-if="isUserPost">
+  <div class="p-6 flex flex-col w-full h-full max-h-full min-h-0">
+    <ButtonGroup class="h-fit" v-if="isUserPost">
       <Button
         as="router-link"
         :to="{ name: 'edit-post', params: { postId } }"
@@ -31,8 +31,12 @@
         >
       </p>
     </div>
-    <article v-html="content" id="post-content"></article>
-    <PostComments :post-id="postId"></PostComments>
+    <article
+      class="overflow-auto h-full"
+      v-html="content"
+      id="post-content"
+    ></article>
+    <PostComments class="mt-6" :post-id="postId"></PostComments>
   </div>
 </template>
 
@@ -45,6 +49,7 @@ import Button from 'primevue/button'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 import PostComments from '@/components/PostComments.vue'
+import { formatDateTime } from '@/utils/formatters'
 
 const confirm = useConfirm()
 const toast = useToast()
@@ -68,9 +73,9 @@ onMounted(async () => {
   content.value = post.content
   author.value = `${post.firstName} ${post.lastName}`
 
-  created.value = new Date(post.created).toDateString()
+  created.value = formatDateTime(new Date(post.created))
   hasBeenUpdated.value = post.updated !== post.created
-  updated.value = new Date(post.updated).toDateString()
+  updated.value = formatDateTime(new Date(post.updated))
 })
 
 async function deletePost() {

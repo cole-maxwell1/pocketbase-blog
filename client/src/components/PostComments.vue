@@ -7,7 +7,7 @@
       <div
         class="overflow-auto"
         ref="scrollContainer"
-        style="max-height: 400px"
+        style="max-height: 225px"
       >
         <ul v-if="comments.length > 0">
           <li
@@ -20,16 +20,22 @@
             <small class="text-gray-500">{{ comment.created }}</small>
           </li>
         </ul>
-        <div v-else class="text-center p-4">
+        <div
+          v-if="!isLoadingComments && comments.length === 0"
+          class="text-center p-10"
+        >
           No comments yet. Be the first to comment!
         </div>
         <div v-if="isLoadingComments" class="text-center p-4">
-          Loading more comments...
+          <ProgressSpinner />
         </div>
       </div>
     </template>
     <template #footer>
-      <form @submit.prevent="postComment" class="flex flex-col gap-2">
+      <form
+        @submit.prevent="postComment"
+        class="mt-auto flex flex-col gap-2 h-full"
+      >
         <Textarea v-model="newComment" rows="3" autoResize></Textarea>
         <Button type="submit" label="Post Comment" icon="pi pi-comment" />
       </form>
@@ -45,6 +51,8 @@ import Textarea from 'primevue/textarea'
 import Button from 'primevue/button'
 import client from '@/pocketbase'
 import { useToast } from 'primevue/usetoast'
+import { formatDateTime } from '@/utils/formatters'
+import ProgressSpinner from 'primevue/progressspinner'
 
 const toast = useToast()
 const PAGE_SIZE = 5
@@ -105,8 +113,8 @@ async function loadCommentsChunk(page: number) {
         id: comment.id,
         author: `${comment.firstName} ${comment.lastName}`,
         content: comment.content,
-        created: comment.created,
-        updatedAt: comment.updated,
+        created: formatDateTime(new Date(comment.created)),
+        updatedAt: formatDateTime(new Date(comment.updated)),
       })),
     )
 

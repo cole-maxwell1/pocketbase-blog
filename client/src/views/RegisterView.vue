@@ -140,13 +140,11 @@ async function createUser() {
         // Authenticate the user in order to set the username
         await authUser()
 
-        // After successful user registration, redirect to dashboard
-        router.push({ path: '/about' })
+        // After successful user registration, redirect to home
+        router.push({ name: 'home' })
       } else {
         console.log('Error')
       }
-    } else {
-      alert("Password doesn't match")
     }
   } catch (error: unknown) {
     console.log(error)
@@ -180,9 +178,14 @@ async function authUser() {
   }
 }
 
-// Simple utility function to validate input. Easily extendable with additional checks if needed
 const validateInput = () => {
   if (form.value.password !== form.value.passwordConfirm) {
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'Passwords do not match. Please try again.',
+      life: 5000,
+    })
     return false
   } else {
     return true
