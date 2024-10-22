@@ -161,7 +161,8 @@ async function postComment() {
       detail: 'Your comment has been posted successfully',
       life: 3000,
     })
-  } catch (error) {
+  } catch (error: unknown) {
+    console.error(error)
     toast.add({
       severity: 'error',
       summary: 'Error Posting Comment',

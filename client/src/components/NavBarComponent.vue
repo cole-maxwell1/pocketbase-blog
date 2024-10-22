@@ -69,7 +69,10 @@
           <Button
             v-if="isUserLoggedIn"
             as="router-link"
-            to="/profile"
+            :to="{
+              name: 'profile',
+              params: { profileId: userId },
+            }"
             text
             v-tooltip.left="'Profile'"
             :label="`Hi, ${firstName}`"
@@ -112,6 +115,7 @@ import pocketBaseLogo from '@/assets/svg/logos-pocket-base.svg'
 const router = useRouter()
 
 const isUserLoggedIn = ref(!!client.authStore.token)
+const userId = ref(client.authStore.model?.id || '')
 const isMobileMenuOpen = ref(false)
 const firstName = ref(
   client.authStore.model?.firstName[0].toUpperCase() +
