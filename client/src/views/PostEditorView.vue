@@ -17,123 +17,9 @@
             />
             <label for="email">Title</label>
           </FloatLabel>
-          <Editor v-model="content" editorStyle="height: 320px">
-            <template v-slot:toolbar>
-              <select class="ql-header" v-tooltip.bottom="'Header Levels'">
-                <option selected></option>
-                <option value="1"></option>
-                <option value="2"></option>
-                <option value="3"></option>
-                <option value="4"></option>
-                <option value="5"></option>
-                <option value="6"></option>
-              </select>
-              <span class="ql-formats">
-                <button v-tooltip.bottom="'Bold'" class="ql-bold"></button>
-                <button v-tooltip.bottom="'Italic'" class="ql-italic"></button>
-                <button
-                  v-tooltip.bottom="'Underline'"
-                  class="ql-underline"
-                ></button>
-                <button
-                  v-tooltip.bottom="'Ordered List'"
-                  class="ql-list"
-                  value="ordered"
-                ></button>
-                <button
-                  v-tooltip.bottom="'Bullet List'"
-                  class="ql-list"
-                  value="bullet"
-                ></button>
-                <button v-tooltip.bottom="'Strike'" class="ql-strike"></button>
-                <button v-tooltip.bottom="'Link'" class="ql-link"></button>
-                <select v-tooltip.bottom="'Text Color'" class="ql-color">
-                  <option value="#e60000"></option>
-                  <option value="#ff9900"></option>
-                  <option value="#ffff00"></option>
-                  <option value="#008a00"></option>
-                  <option value="#0066cc"></option>
-                  <option value="#9933ff"></option>
-                  <option value="#ffffff"></option>
-                  <option value="#facccc"></option>
-                  <option value="#ffebcc"></option>
-                  <option value="#ffffcc"></option>
-                  <option value="#cce8cc"></option>
-                  <option value="#cce0f5"></option>
-                  <option value="#ebd6ff"></option>
-                  <option value="#bbbbbb"></option>
-                  <option value="#f06666"></option>
-                  <option value="#ffc266"></option>
-                  <option value="#ffff66"></option>
-                  <option value="#66b966"></option>
-                  <option value="#66a3e0"></option>
-                  <option value="#c285ff"></option>
-                  <option value="#888888"></option>
-                  <option value="#a10000"></option>
-                  <option value="#b26b00"></option>
-                  <option value="#b2b200"></option>
-                  <option value="#006100"></option>
-                  <option value="#0047b2"></option>
-                  <option value="#6b24b2"></option>
-                  <option value="#444444"></option>
-                  <option value="#5c0000"></option>
-                  <option value="#663d00"></option>
-                  <option value="#666600"></option>
-                  <option value="#003700"></option>
-                  <option value="#002966"></option>
-                  <option value="#3d1466"></option>
-                </select>
-                <select class="ql-background">
-                  <option value="#e60000"></option>
-                  <option value="#ff9900"></option>
-                  <option value="#ffff00"></option>
-                  <option value="#008a00"></option>
-                  <option value="#0066cc"></option>
-                  <option value="#9933ff"></option>
-                  <option value="#ffffff"></option>
-                  <option value="#facccc"></option>
-                  <option value="#ffebcc"></option>
-                  <option value="#ffffcc"></option>
-                  <option value="#cce8cc"></option>
-                  <option value="#cce0f5"></option>
-                  <option value="#ebd6ff"></option>
-                  <option value="#bbbbbb"></option>
-                  <option value="#f06666"></option>
-                  <option value="#ffc266"></option>
-                  <option value="#ffff66"></option>
-                  <option value="#66b966"></option>
-                  <option value="#66a3e0"></option>
-                  <option value="#c285ff"></option>
-                  <option value="#888888"></option>
-                  <option value="#a10000"></option>
-                  <option value="#b26b00"></option>
-                  <option value="#b2b200"></option>
-                  <option value="#006100"></option>
-                  <option value="#0047b2"></option>
-                  <option value="#6b24b2"></option>
-                  <option value="#444444"></option>
-                  <option value="#5c0000"></option>
-                  <option value="#663d00"></option>
-                  <option value="#666600"></option>
-                  <option value="#003700"></option>
-                  <option value="#002966"></option>
-                  <option value="#3d1466"></option>
-                </select>
-                <button
-                  v-tooltip.bottom="'Subscript'"
-                  class="ql-script"
-                  value="sub"
-                ></button>
-                <button
-                  v-tooltip.bottom="'Superscript'"
-                  class="ql-script"
-                  value="super"
-                ></button>
-              </span>
-            </template>
-          </Editor>
-           <!-- Tag Selector -->
-           <MultiSelect
+          <RichEditor v-model="content" />
+          <!-- Tag Selector -->
+          <MultiSelect
             v-model="selectedTags"
             :options="tags"
             optionLabel="name"
@@ -150,7 +36,7 @@
               <div class="p-3">
                 <Button
                   :label="`Create Tag: ${filterValue}`"
-                  @click="createTag(filterValue )"
+                  @click="createTag(filterValue)"
                   class="p-button-text"
                 />
               </div>
@@ -171,7 +57,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import Card from 'primevue/card'
-import Editor from 'primevue/editor'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import FloatLabel from 'primevue/floatlabel'
@@ -179,6 +64,7 @@ import MultiSelect from 'primevue/multiselect'
 import client from '@/pocketbase'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
+import RichEditor from '@/components/RichEditor.vue'
 
 const toast = useToast()
 
@@ -191,16 +77,15 @@ const title = ref<string>('')
 const content = ref<string>('')
 
 const isLoadingTags = ref<boolean>(false)
-const selectedTags = ref<any[]>([]) // Array to hold selected tags
-const tags = ref<any[]>([]) // Array to hold all available tags
-  const filterValue = ref('');
-
+const selectedTags = ref<Tag[]>([]) // Array to hold selected tags
+const tags = ref<Tag[]>([]) // Array to hold all available tags
+const filterValue = ref('')
 
 onMounted(async () => {
   // Load existing tags
   isLoadingTags.value = true
   const result = await client.collection('tags').getFullList()
-  tags.value = result
+  tags.value = result.map(tag => ({ id: tag.id, name: tag.name }))
   isLoadingTags.value = false
 
   if (hasPostId) {
@@ -215,26 +100,29 @@ onMounted(async () => {
   }
 })
 
-import type { MultiSelectFilterEvent } from 'primevue/multiselect';
+import type { MultiSelectFilterEvent } from 'primevue/multiselect'
+import type { Tag } from '@/interfaces/post'
 
 function onFilter(event: MultiSelectFilterEvent) {
-  filterValue.value = event.value;
+  filterValue.value = event.value
 }
 
 async function createTag(tagName: string) {
   // Check if tag already exists
   const existingTag = tags.value.find(
-    (tag) => tag.name.toLowerCase() === tagName.toLowerCase()
+    tag => tag.name.toLowerCase() === tagName.toLowerCase(),
   )
   if (existingTag) {
     // Add to selectedTags if not already selected
-    if (!selectedTags.value.some((tag) => tag.id === existingTag.id)) {
+    if (!selectedTags.value.some(tag => tag.id === existingTag.id)) {
       selectedTags.value.push(existingTag)
     }
   } else {
     try {
       // Create new tag in 'tags' collection
-      const newTag = await client.collection('tags').create({ name: tagName })
+      const result = await client.collection('tags').create({ name: tagName })
+
+      const newTag = { id: result.id, name: result.name }
       // Add to tags list
       tags.value.push(newTag)
       // Add to selectedTags
@@ -246,7 +134,7 @@ async function createTag(tagName: string) {
 }
 
 async function submitPost() {
-  const tagIds = selectedTags.value.map((tag) => tag.id)
+  const tagIds = selectedTags.value.map(tag => tag.id)
 
   try {
     if (hasPostId) {

@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-import LoginView from '../views/LoginView.vue'
+import HomeView from '@/views/HomeView.vue'
+import LoginView from '@/views/LoginView.vue'
 import client from '@/pocketbase'
 
 const router = createRouter({
@@ -31,7 +31,7 @@ const router = createRouter({
       component: () => import('../views/FeedView.vue'),
     },
     {
-      path: '/profile',
+      path: '/profile/:profileId',
       name: 'profile',
       meta: { requiresAuth: true },
       component: () => import('../views/ProfileView.vue'),

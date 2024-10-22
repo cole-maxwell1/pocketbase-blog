@@ -19,21 +19,11 @@ import { onMounted, ref } from 'vue'
 import Paginator, { type PageState } from 'primevue/paginator'
 import PostDisplayCard from '@/components/PostDisplayCard.vue'
 import { useToast } from 'primevue/usetoast'
+import type { Post, Tag } from '@/interfaces/post'
 
 const toast = useToast()
 
-const posts = ref<
-  {
-    id: string
-    title: string
-    content: string
-    firstName: string
-    lastName: string
-    tags: any[]
-    created: string
-    updated: string
-  }[]
->([])
+const posts = ref<Post[]>([])
 
 const currentPage = ref(1)
 const totalPosts = ref(0)
@@ -62,7 +52,7 @@ async function getPostsPage(page: number, totalItems: number) {
       content: item.content,
       firstName: item.firstName,
       lastName: item.lastName,
-      tags: item.expand?.tags.map((tag: { name: any; id: any }) => {
+      tags: item.expand?.tags.map((tag: Tag) => {
         return {
           name: tag?.name,
           id: tag?.id,
