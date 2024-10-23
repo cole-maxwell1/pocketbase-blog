@@ -78,7 +78,11 @@ export async function updatePost(
   postId: string,
   fields: { title: string; content: string; tagIds: string[] },
 ): Promise<Post> {
-  await pbClient.collection('posts').update(postId, fields)
+  await pbClient.collection('posts').update(postId, {
+    title: fields.title,
+    content: fields.content,
+    tags: fields.tagIds,
+  })
 
   const postDetails = await pbClient
     .collection('posts_author_vw')
