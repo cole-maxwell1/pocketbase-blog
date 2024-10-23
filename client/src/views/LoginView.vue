@@ -47,7 +47,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import client from '@/pocketbase'
+import pbClient from '@/pocketbase'
 import Card from 'primevue/card'
 import FloatLabel from 'primevue/floatlabel'
 import InputText from 'primevue/inputtext'
@@ -67,7 +67,7 @@ const password = ref('')
 const authUser = async () => {
   try {
     // Authenticate the user via email and password
-    const userData = await client
+    const userData = await pbClient
       .collection('users')
       .authWithPassword(email.value, password.value)
 

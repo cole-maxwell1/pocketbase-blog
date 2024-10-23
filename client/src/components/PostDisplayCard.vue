@@ -6,7 +6,7 @@
         <p class="text-sm capitalize">
           {{ `By: ${post.firstName} ${post.lastName}` }}
         </p>
-        <p class="text-sm">{{ new Date(post.created).toDateString() }}</p>
+        <p class="text-sm">{{ formatDateTime(post.created) }}</p>
       </div>
     </template>
     <template #content>
@@ -46,20 +46,8 @@ import Card from 'primevue/card'
 import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 import { computed } from 'vue'
-
-interface Post {
-  id: string
-  title: string
-  content: string
-  tags: {
-    id: string
-    name: string
-  }[]
-  firstName: string
-  lastName: string
-  created: string
-  updated: string
-}
+import type { Post } from '@/interfaces/post'
+import { formatDateTime } from '@/utils/formatters'
 
 interface Props {
   post: Post

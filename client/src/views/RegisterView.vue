@@ -101,7 +101,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import client from '@/pocketbase'
+import pbClient from '@/pocketbase'
 import FloatLabel from 'primevue/floatlabel'
 import Password from 'primevue/password'
 import Divider from 'primevue/divider'
@@ -127,7 +127,7 @@ async function createUser() {
   try {
     if (validateInput()) {
       // Create new user
-      const user = await client.collection('users').create({
+      const user = await pbClient.collection('users').create({
         firstName: form.value.firstName.toLowerCase(),
         lastName: form.value.lastName.toLowerCase(),
         username: form.value.username,
@@ -161,7 +161,7 @@ async function createUser() {
 async function authUser() {
   try {
     // Authenticate the user via email and password
-    await client
+    await pbClient
       ?.collection('users')
       .authWithPassword(form.value.email, form.value.password)
 

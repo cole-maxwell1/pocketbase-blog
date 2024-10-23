@@ -15,9 +15,13 @@
             :key="comment.id"
             class="p-2 border-b border-gray-300"
           >
-            <p class="font-semibold">{{ comment.author }}</p>
+            <p class="font-semibold capitalize">
+              {{ `${comment.firstName} ${comment.lastName}` }}
+            </p>
             <p>{{ comment.content }}</p>
-            <small class="text-gray-500">{{ comment.created }}</small>
+            <small class="text-surface-500 dark:text-surface-400">{{
+              formatDateTime(comment.created)
+            }}</small>
           </li>
         </ul>
         <div
@@ -33,12 +37,24 @@
     </template>
     <template #footer>
       <form
+        v-if="isLoggedIn"
         @submit.prevent="postComment"
         class="mt-auto flex flex-col gap-2 h-full"
       >
         <Textarea v-model="newComment" rows="3" autoResize></Textarea>
         <Button type="submit" label="Post Comment" icon="pi pi-comment" />
       </form>
+      <template v-else>
+        <p class="text-center p-4">
+          <router-link
+            to="/login"
+            class="text-primary-500 dark:text-primary-400"
+          >
+            Log in
+          </router-link>
+          to post a comment
+        </p>
+      </template>
     </template>
   </Card>
 </template>
@@ -49,26 +65,24 @@ import { useInfiniteScroll } from '@vueuse/core'
 import Card from 'primevue/card'
 import Textarea from 'primevue/textarea'
 import Button from 'primevue/button'
-import client from '@/pocketbase'
 import { useToast } from 'primevue/usetoast'
 import { formatDateTime } from '@/utils/formatters'
 import ProgressSpinner from 'primevue/progressspinner'
+import type { PostComment } from '@/interfaces/post'
+import {
+  createNewComment,
+  getPostCommentsPaginated,
+} from '@/services/postService'
+import pbClient from '@/pocketbase'
 
 const toast = useToast()
 const PAGE_SIZE = 5
 const pagesLoaded = ref(new Set<number>())
 const totalCommentPages = ref(1)
 const isLoadingComments = ref<boolean>(false)
-const comments = ref<
-  {
-    id: string
-    author: string
-    content: string
-    created: string
-    updatedAt: string
-  }[]
->([])
+const comments = ref<PostComment[]>([])
 const newComment = ref<string>('')
+const isLoggedIn = ref<boolean>(false)
 
 interface Props {
   postId: string
@@ -77,6 +91,7 @@ interface Props {
 const props = defineProps<Props>()
 
 onMounted(() => {
+  isLoggedIn.value = pbClient.authStore.isValid
   loadCommentsChunk(1)
 })
 
@@ -101,25 +116,16 @@ async function loadCommentsChunk(page: number) {
 
   try {
     isLoadingComments.value = true
-    const result = await client
-      .collection('comments_author_vw')
-      .getList(page, PAGE_SIZE, {
-        filter: `postId='${props.postId}'`,
-        sort: 'created',
-      })
-
-    comments.value.push(
-      ...result.items.map(comment => ({
-        id: comment.id,
-        author: `${comment.firstName} ${comment.lastName}`,
-        content: comment.content,
-        created: formatDateTime(new Date(comment.created)),
-        updatedAt: formatDateTime(new Date(comment.updated)),
-      })),
+    const fetchedCommentsPage = await getPostCommentsPaginated(
+      props.postId,
+      page,
+      PAGE_SIZE,
     )
 
+    comments.value.push(...fetchedCommentsPage.comments)
+
     pagesLoaded.value.add(page)
-    totalCommentPages.value = result.totalPages
+    totalCommentPages.value = fetchedCommentsPage.totalPages
   } catch (error) {
     console.error('Error loading comments:', error)
     toast.add({
@@ -135,23 +141,9 @@ async function loadCommentsChunk(page: number) {
 
 async function postComment() {
   try {
-    const resultComment = await client.collection('comments').create({
-      userId: client.authStore?.model?.id,
-      postId: props.postId,
-      content: newComment.value,
-    })
+    const resultComment = await createNewComment(props.postId, newComment.value)
 
-    const commentDetails = await client
-      .collection('comments_author_vw')
-      .getOne(resultComment.id)
-
-    comments.value.push({
-      id: commentDetails.id,
-      author: `${commentDetails.firstName} ${commentDetails.lastName}`,
-      content: commentDetails.content,
-      created: commentDetails.created,
-      updatedAt: commentDetails.updated,
-    })
+    comments.value.unshift(resultComment)
 
     newComment.value = ''
 

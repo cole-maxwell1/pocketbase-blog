@@ -2,8 +2,10 @@
   <div
     class="p-6 flex flex-col gap-4 w-full h-full max-h-full min-h-0 overflow-auto"
   >
-    <div>
-      <h1 class="mb-2 font-semibold text-3xl capitalize">{{ authorName }}</h1>
+    <div v-if="author">
+      <h1 class="mb-2 font-semibold text-3xl capitalize">
+        {{ `${author.firstName} ${author.lastName}` }}
+      </h1>
       <Inplace
         :disabled="!isUserProfile"
         v-model:active="isEditingBio"
@@ -15,10 +17,10 @@
       >
         <template #display>
           <article
-            v-if="bio"
+            v-if="author.bio"
             class="rich-text"
             v-tooltip.top="{ disabled: !isUserProfile, value: 'Click to edit' }"
-            v-html="bio"
+            v-html="author.bio"
             id="bio-content"
           ></article>
           <p
@@ -32,7 +34,7 @@
         <template #content="{ closeCallback }">
           <form @submit.prevent="saveBio">
             <RichEditor v-model="editedBio" />
-            <div class="flex gap-4 justify-end">
+            <div class="mt-2 flex gap-4 justify-end">
               <Button
                 label="Save"
                 icon="pi pi-check"
@@ -50,6 +52,9 @@
         </template>
       </Inplace>
     </div>
+    <div v-else class="flex justify-center">
+      <ProgressSpinner />
+    </div>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <PostDisplayCard v-for="post in posts" :post="post" :key="post.id" />
       <Paginator
@@ -65,15 +70,19 @@
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import client from '@/pocketbase'
+import pbClient from '@/pocketbase'
 import { onMounted, ref } from 'vue'
 import Inplace from 'primevue/inplace'
 import Button from 'primevue/button'
 import { useToast } from 'primevue/usetoast'
 import RichEditor from '@/components/RichEditor.vue'
 import PostDisplayCard from '@/components/PostDisplayCard.vue'
-import type { Post, Tag } from '@/interfaces/post'
+import type { Post } from '@/interfaces/post'
 import Paginator from 'primevue/paginator'
+import { getPostByUserIdPaginated } from '@/services/postService'
+import type { Author } from '@/interfaces/author'
+import { getAuthorById, updateAuthorBio } from '@/services/authorService'
+import ProgressSpinner from 'primevue/progressspinner'
 
 const toast = useToast()
 
@@ -82,8 +91,7 @@ const route = useRoute()
 const isUserProfile = ref<boolean>(false)
 const profileId = route.params.profileId as string
 
-const bio = ref<string>('')
-const authorName = ref<string>('')
+const author = ref<Author | undefined>(undefined)
 
 const isEditingBio = ref<boolean>(false)
 const editedBio = ref<string>('')
@@ -95,11 +103,10 @@ const itemsPerPage = ref(5)
 
 onMounted(async () => {
   try {
-    const author = await client.collection('authors_vw').getOne(profileId)
-    isUserProfile.value = author.id === client.authStore?.model?.id
-    bio.value = author.bio
-    editedBio.value = bio.value
-    authorName.value = `${author.firstName} ${author.lastName}`
+    author.value = await getAuthorById(profileId)
+    isUserProfile.value = author.value.id === pbClient.authStore?.model?.id
+
+    editedBio.value = author.value.bio
   } catch (error: unknown) {
     console.log(error)
     toast.add({
@@ -125,12 +132,9 @@ onMounted(async () => {
 
 async function saveBio() {
   try {
-    if (editedBio.value !== bio.value) {
-      const updatedUser = await client
-        .collection('users')
-        .update(profileId, { bio: editedBio.value })
-
-      bio.value = updatedUser.bio
+    if (author.value && editedBio.value !== author.value.bio) {
+      await updateAuthorBio(editedBio.value)
+      author.value.bio = editedBio.value
       isEditingBio.value = false
       toast.add({
         severity: 'success',
@@ -154,32 +158,16 @@ async function saveBio() {
 
 async function getProfilePostsPage(page: number, totalItems: number) {
   try {
-    const resultList = await client
-      .collection('posts_author_vw')
-      .getList(page, totalItems, {
-        expand: 'tags',
-        sort: 'created',
-        filter: `userId='${profileId}'`,
-      })
+    const postsPage = await getPostByUserIdPaginated(
+      profileId,
+      page,
+      totalItems,
+    )
 
-    totalPosts.value = resultList.totalItems
+    totalPosts.value = postsPage.totalItems
 
     // Update the posts array
-    posts.value = resultList.items.map(item => ({
-      id: item.id,
-      title: item.title,
-      content: item.content,
-      firstName: item.firstName,
-      lastName: item.lastName,
-      tags: item.expand?.tags.map((tag: Tag) => {
-        return {
-          name: tag?.name,
-          id: tag?.id,
-        }
-      }),
-      created: item.created,
-      updated: item.updated,
-    }))
+    posts.value = postsPage.posts
   } catch (error: unknown) {
     console.error(error)
     toast.add({

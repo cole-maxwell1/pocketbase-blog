@@ -1,27 +1,33 @@
 <template>
-  <div class="p-6 flex flex-col w-full h-full max-h-full min-h-0 overflow-auto">
+  <div
+    v-if="post"
+    class="p-6 flex flex-col w-full h-full max-h-full min-h-0 overflow-auto"
+  >
     <div class="md:flex w-full">
       <div class="flex flex-col gap-1 mb-1">
-        <h1 class="font-semibold text-3xl">{{ title }}</h1>
+        <h1 class="font-semibold text-3xl">{{ post.title }}</h1>
         <router-link
-          v-if="authorId"
-          :to="{ name: 'profile', params: { profileId: authorId } }"
+          v-if="post.userId"
+          :to="{ name: 'profile', params: { profileId: post.userId } }"
           class="flex gap-1 items-center transition hover:translate-x-2"
         >
-          By: <span class="capitalize">{{ author }}</span>
+          By:
+          <span class="capitalize">{{
+            `${post.firstName} ${post.lastName}`
+          }}</span>
           <span class="pi pi-chevron-right" style="font-size: 0.75rem"></span>
         </router-link>
-        <p class="text-sm text-surface-600 dark:text-surface-400">
-          <span
-            >Published on <span>{{ created }}</span></span
-          >
-          
-          <span v-if="hasBeenUpdated">
-            Updated on <span>{{ updated }}</span>
-          </span>
-        </p>
+        <div class="text-sm text-surface-600 dark:text-surface-400">
+          <p>
+            Published on <span>{{ formatDateTime(post.created) }}</span>
+          </p>
+
+          <p v-if="hasBeenUpdated">
+            Updated on <span>{{ formatDateTime(post.updated) }}</span>
+          </p>
+        </div>
         <!-- Share buttons -->
-        <ShareButtonGroup :title="title"></ShareButtonGroup>
+        <ShareButtonGroup :title="post.title"></ShareButtonGroup>
       </div>
       <ButtonGroup class="self-end ml-auto" v-if="isUserPost">
         <Button
@@ -42,16 +48,29 @@
         />
       </ButtonGroup>
     </div>
-    <article v-html="content" class="rich-text"></article>
+    <article v-html="post.content" class="rich-text"></article>
+    <div class="flex gap-1 items-center">
+      <Tag
+        v-for="tag in post.tags"
+        :key="tag.id"
+        :value="tag.name"
+        severity="secondary"
+        icon="pi pi-tag"
+        class="capitalize mt-4"
+      />
+    </div>
     <div class="min-h-0">
       <PostComments class="mt-6 h-fit" :post-id="postId"></PostComments>
     </div>
+  </div>
+  <div v-else class="flex justify-center">
+    <ProgressSpinner />
   </div>
 </template>
 
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
-import client from '@/pocketbase'
+import pbClient from '@/pocketbase'
 import { onMounted, ref } from 'vue'
 import ButtonGroup from 'primevue/buttongroup'
 import Button from 'primevue/button'
@@ -60,6 +79,10 @@ import { useToast } from 'primevue/usetoast'
 import PostComments from '@/components/PostComments.vue'
 import { formatDateTime } from '@/utils/formatters'
 import ShareButtonGroup from '@/components/ShareButtonGroup.vue'
+import { deletePost, getPostById } from '@/services/postService'
+import type { Post } from '@/interfaces/post'
+import ProgressSpinner from 'primevue/progressspinner'
+import Tag from 'primevue/tag'
 
 const confirm = useConfirm()
 const toast = useToast()
@@ -69,30 +92,28 @@ const router = useRouter()
 const isUserPost = ref<boolean>(false)
 
 const postId = route.params.postId as string
-const title = ref<string>('')
-const content = ref<string>('')
-const author = ref<string>('')
-const authorId = ref<string>('')
-const created = ref<string>('')
+const post = ref<Post | undefined>(undefined)
 const hasBeenUpdated = ref<boolean>(false)
-const updated = ref<string>('')
 
 onMounted(async () => {
-  const post = await client.collection('posts_author_vw').getOne(postId)
-  isUserPost.value = post.userId === client.authStore?.model?.id
-  title.value = post.title
-  content.value = post.content
-  author.value = `${post.firstName} ${post.lastName}`
-  authorId.value = post.userId
-
-  created.value = formatDateTime(new Date(post.created))
-  hasBeenUpdated.value = post.updated !== post.created
-  updated.value = formatDateTime(new Date(post.updated))
+  try {
+    post.value = await getPostById(postId)
+    isUserPost.value = post.value.userId === pbClient.authStore?.model?.id
+    hasBeenUpdated.value = post.value.updated !== post.value.created
+  } catch (error: unknown) {
+    console.log(error)
+    toast.add({
+      severity: 'error',
+      summary: 'Rejected',
+      detail: 'Failed to fetch the post. Please try again.',
+      life: 5000,
+    })
+  }
 })
 
-async function deletePost() {
+async function handelDeletePost() {
   try {
-    await client.collection('posts').delete(postId)
+    await deletePost(postId)
     toast.add({
       severity: 'info',
       summary: 'Confirmed',
@@ -128,7 +149,7 @@ function deletePostConfirm() {
       severity: 'danger',
     },
     accept: async () => {
-      await deletePost()
+      await handelDeletePost()
     },
   })
 }

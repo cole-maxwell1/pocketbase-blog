@@ -14,12 +14,12 @@
 </template>
 
 <script setup lang="ts">
-import client from '@/pocketbase'
 import { onMounted, ref } from 'vue'
 import Paginator, { type PageState } from 'primevue/paginator'
 import PostDisplayCard from '@/components/PostDisplayCard.vue'
 import { useToast } from 'primevue/usetoast'
-import type { Post, Tag } from '@/interfaces/post'
+import type { Post } from '@/interfaces/post'
+import { getAllPostsPaginated } from '@/services/postService'
 
 const toast = useToast()
 
@@ -39,28 +39,12 @@ async function handelPageChange(event: PageState) {
 
 async function getPostsPage(page: number, totalItems: number) {
   try {
-    const resultList = await client
-      .collection('posts_author_vw')
-      .getList(page, totalItems, { expand: 'tags' })
+    const postsPage = await getAllPostsPaginated(page, totalItems)
 
-    totalPosts.value = resultList.totalItems
+    totalPosts.value = postsPage.totalItems
 
     // Update the posts array
-    posts.value = resultList.items.map(item => ({
-      id: item.id,
-      title: item.title,
-      content: item.content,
-      firstName: item.firstName,
-      lastName: item.lastName,
-      tags: item.expand?.tags.map((tag: Tag) => {
-        return {
-          name: tag?.name,
-          id: tag?.id,
-        }
-      }),
-      created: item.created,
-      updated: item.updated,
-    }))
+    posts.value = postsPage.posts
   } catch (error: unknown) {
     console.error(error)
     toast.add({
