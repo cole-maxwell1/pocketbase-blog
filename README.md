@@ -1,4 +1,37 @@
 # Pocketbase Blog
+A simple blogging platform built with PocketBase and Vue.js 3. 
+## Development
+
+### Project Setup
+Ensure you have Node.js 18+ and go 1.23.2+ installed on your machine.
+
+#### Client
+1. Install dependencies
+```sh
+cd client && npm install
+```
+2. Run the development server
+```sh
+npm run dev
+```
+
+#### Server
+1. Install dependencies
+```sh
+cd server && go mod download
+```
+2. Run the development server
+```sh
+go run main.go serve
+```
+
+#### Release
+1. Ensure you have [goreleaser installed](https://goreleaser.com/install/) on your machin
+
+2. You can test the goreleaser configuration by running the following command
+```sh
+goreleaser release --snapshot --clean
+```
 
 ## Requirements
 Create a simple blogging platform using PocketBase as the backend and a frontend framework of your choice (e.g., Svelte, React, Vue, or plain JavaScript).
