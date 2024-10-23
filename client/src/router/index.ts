@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
-import client from '@/pocketbase'
+import pbClient from '@/pocketbase'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -22,27 +22,17 @@ const router = createRouter({
       component: () => import('../views/RegisterView.vue'),
     },
     {
-      path: '/feed',
-      name: 'feed',
-      meta: { requiresAuth: true },
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/FeedView.vue'),
-    },
-    {
       path: '/profile/:profileId',
       name: 'profile',
-      meta: { requiresAuth: true },
       component: () => import('../views/ProfileView.vue'),
     },
     {
       path: '/posts',
-      meta: { requiresAuth: true },
       children: [
         {
           path: 'new',
           name: 'new-post',
+          meta: { requiresAuth: true },
           component: () => import('../views/PostEditorView.vue'),
         },
         {
@@ -53,6 +43,7 @@ const router = createRouter({
         {
           path: ':postId/edit',
           name: 'edit-post',
+          meta: { requiresAuth: true },
           component: () => import('../views/PostEditorView.vue'),
         },
       ],
@@ -63,7 +54,7 @@ const router = createRouter({
 router.beforeEach(to => {
   // Init the store within the beforeEach function as per the documentation:
   // https://pinia.vuejs.org/core-concepts/outside-component-usage.html#single-page-applications
-  if (to.meta.requiresAuth && !client?.authStore.token) {
+  if (to.meta.requiresAuth && !pbClient?.authStore.token) {
     return {
       path: '/',
     }
@@ -74,7 +65,7 @@ router.beforeEach(to => {
 router.beforeEach(to => {
   if (
     (to.name === 'login' || to.name === 'register') &&
-    client?.authStore.token
+    pbClient?.authStore.token
   ) {
     return {
       path: '/feed',

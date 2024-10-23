@@ -36,22 +36,12 @@
           class="flex md:flex-row flex-col md:items-center gap-2 md:place-self-start"
         >
           <Button
-            v-if="isUserLoggedIn"
             as="router-link"
             to="/"
             text
             label="Home"
             severity="secondary"
             icon="pi pi-fw pi-home"
-          />
-          <Button
-            v-if="isUserLoggedIn"
-            as="router-link"
-            to="/feed"
-            text
-            label="Feed"
-            severity="secondary"
-            icon="pi pi-fw pi-book"
           />
           <Button
             v-if="isUserLoggedIn"
@@ -106,7 +96,7 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import client from '@/pocketbase'
+import pbClient from '@/pocketbase'
 import { ref } from 'vue'
 import Button from 'primevue/button'
 import pocketBaseLogo from '@/assets/svg/logos-pocket-base.svg'
@@ -114,17 +104,17 @@ import pocketBaseLogo from '@/assets/svg/logos-pocket-base.svg'
 // Router composable
 const router = useRouter()
 
-const isUserLoggedIn = ref(!!client.authStore.token)
-const userId = ref(client.authStore.model?.id || '')
+const isUserLoggedIn = ref(!!pbClient.authStore.token)
+const userId = ref(pbClient.authStore.model?.id || '')
 const isMobileMenuOpen = ref(false)
 const firstName = ref(
-  client.authStore.model?.firstName[0].toUpperCase() +
-    client.authStore.model?.firstName.slice(1),
+  pbClient.authStore.model?.firstName[0].toUpperCase() +
+    pbClient.authStore.model?.firstName.slice(1),
 )
 
 const logoutUser = () => {
   // Remove the PocketBase token
-  client.authStore.clear()
+  pbClient.authStore.clear()
   // Redirect to the login page
 
   isUserLoggedIn.value = false
