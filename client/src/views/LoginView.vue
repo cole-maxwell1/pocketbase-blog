@@ -1,9 +1,9 @@
 <template>
-  <main class="flex flex-col justify-center items-center h-full">
+  <main class="flex h-full flex-col items-center justify-center">
     <Card>
       <template #title>Login</template>
       <template #content>
-        <form class="gap-6 grid grid-cols-1 lg:w-96" @submit.prevent="authUser">
+        <form class="grid grid-cols-1 gap-6 lg:w-96" @submit.prevent="authUser">
           <FloatLabel variant="on">
             <InputText
               type="email"
@@ -33,7 +33,7 @@
         <div class="flex flex-col items-center">
           <p>Don't have an account?</p>
           <router-link
-            class="text-sky-500 hover:text-sky-700 dark:hover:text-sky-300 underline underline-offset-2 transition-colors duration-200"
+            class="text-sky-500 underline underline-offset-2 transition-colors duration-200 hover:text-sky-700 dark:hover:text-sky-300"
             to="/register"
           >
             Register here

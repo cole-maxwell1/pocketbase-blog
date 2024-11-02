@@ -26,7 +26,7 @@
             :to="{ name: 'post-view', params: { postId: post.id } }"
           />
         </div>
-        <div class="flex gap-1 items-center">
+        <div class="flex items-center gap-1">
           <Tag
             v-for="tag in post.tags"
             :key="tag.id"

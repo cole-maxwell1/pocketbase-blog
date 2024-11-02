@@ -1,7 +1,7 @@
 <template>
   <Card>
     <template #header>
-      <h1 class="text-2xl font-semibold pt-4 px-4 mb-2">Comments</h1>
+      <h1 class="mb-2 px-4 pt-4 text-2xl font-semibold">Comments</h1>
     </template>
     <template #content>
       <div
@@ -13,7 +13,7 @@
           <li
             v-for="comment in comments"
             :key="comment.id"
-            class="p-2 border-b border-gray-300"
+            class="border-b border-gray-300 p-2"
           >
             <p class="font-semibold capitalize">
               {{ `${comment.firstName} ${comment.lastName}` }}
@@ -26,11 +26,11 @@
         </ul>
         <div
           v-if="!isLoadingComments && comments.length === 0"
-          class="text-center p-10"
+          class="p-10 text-center"
         >
           No comments yet. Be the first to comment!
         </div>
-        <div v-if="isLoadingComments" class="text-center p-4">
+        <div v-if="isLoadingComments" class="p-4 text-center">
           <ProgressSpinner />
         </div>
       </div>
@@ -39,13 +39,13 @@
       <form
         v-if="isLoggedIn"
         @submit.prevent="postComment"
-        class="mt-auto flex flex-col gap-2 h-full"
+        class="mt-auto flex h-full flex-col gap-2"
       >
         <Textarea v-model="newComment" rows="3" autoResize></Textarea>
         <Button type="submit" label="Post Comment" icon="pi pi-comment" />
       </form>
       <template v-else>
-        <p class="text-center p-4">
+        <p class="p-4 text-center">
           <router-link
             to="/login"
             class="text-primary-500 dark:text-primary-400"

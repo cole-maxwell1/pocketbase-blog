@@ -1,10 +1,10 @@
 <template>
   <nav
-    class="flex flex-wrap justify-between items-center dark:border-zinc-600 shadow-sm p-2 border-b"
+    class="flex flex-wrap items-center justify-between border-b p-2 shadow-sm dark:border-zinc-600"
   >
     <!-- Logo -->
-    <div class="flex flex-shrink-0 items-center mr-6">
-      <img :src="pocketBaseLogo" alt="PocketBase Logo" class="w-8 h-8" />
+    <div class="mr-6 flex flex-shrink-0 items-center">
+      <img :src="pocketBaseLogo" alt="PocketBase Logo" class="h-8 w-8" />
     </div>
 
     <!-- Mobile menu button -->
@@ -29,11 +29,11 @@
       ]"
     >
       <div
-        class="flex md:flex-row flex-col md:items-center gap-2 mt-2 md:mt-0 md:grow"
+        class="mt-2 flex flex-col gap-2 md:mt-0 md:grow md:flex-row md:items-center"
       >
         <!-- Left-side navigation -->
         <div
-          class="flex md:flex-row flex-col md:items-center gap-2 md:place-self-start"
+          class="flex flex-col gap-2 md:flex-row md:items-center md:place-self-start"
         >
           <Button
             as="router-link"
@@ -55,7 +55,7 @@
         </div>
 
         <!-- Right-side navigation -->
-        <div class="flex md:flex-row flex-col md:items-center gap-2 md:ml-auto">
+        <div class="flex flex-col gap-2 md:ml-auto md:flex-row md:items-center">
           <Button
             v-if="isUserLoggedIn"
             as="router-link"

@@ -9,7 +9,7 @@
         <form
           v-if="!isLoadingPost"
           @submit.prevent="submitPost"
-          class="flex flex-col gap-6 h-fit"
+          class="flex h-fit flex-col gap-6"
         >
           <FloatLabel variant="on">
             <InputText
@@ -46,7 +46,7 @@
               </div>
             </template>
           </MultiSelect>
-          <div class="inline-flex justify-end items-center">
+          <div class="inline-flex items-center justify-end">
             <Button
               :label="hasPostId ? 'Update Post' : 'Create Post'"
               type="submit"

@@ -9,7 +9,7 @@ const route = useRoute()
 </script>
 
 <template>
-  <div class="flex flex-col h-full">
+  <div class="flex h-full flex-col">
     <NavBarComponent
       v-if="route.name !== 'login' && route.name !== 'register'"
     />

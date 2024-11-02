@@ -1,6 +1,6 @@
 <template>
-  <div class="p-6 flex flex-col gap-4 h-full max-h-full overflow-auto">
-    <main class="gap-6 grid grid-cols-1 lg:grid-cols-2 overflow-auto">
+  <div class="flex h-full max-h-full flex-col gap-4 overflow-auto p-6">
+    <main class="grid grid-cols-1 gap-6 overflow-auto lg:grid-cols-2">
       <PostDisplayCard v-for="post in posts" :post="post" :key="post.id" />
     </main>
     <Paginator

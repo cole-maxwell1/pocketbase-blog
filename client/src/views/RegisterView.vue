@@ -1,12 +1,12 @@
 <template>
-  <main class="flex flex-col justify-center items-center h-screen">
+  <main class="flex h-screen flex-col items-center justify-center">
     <Card>
       <template #title>
         <h1>Register an Account</h1>
       </template>
       <template #content>
-        <form class="gap-6 grid grid-cols-1" @submit.prevent="createUser">
-          <div class="gap-6 grid grid-cols-1 lg:grid-cols-2">
+        <form class="grid grid-cols-1 gap-6" @submit.prevent="createUser">
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <FloatLabel variant="on">
               <InputText
                 type="text"
@@ -56,7 +56,7 @@
               pt:pcInputText:root:class="w-full"
             >
               <template #header>
-                <div class="mb-4 font-semibold text-xm">Pick a password</div>
+                <div class="text-xm mb-4 font-semibold">Pick a password</div>
               </template>
               <template #footer>
                 <Divider />
@@ -87,7 +87,7 @@
         <div class="flex flex-col items-center">
           <p>Already have an account?</p>
           <router-link
-            class="text-sky-500 hover:text-sky-700 dark:hover:text-sky-300 underline underline-offset-2 transition-colors duration-200"
+            class="text-sky-500 underline underline-offset-2 transition-colors duration-200 hover:text-sky-700 dark:hover:text-sky-300"
             to="/login"
           >
             Login here

@@ -1,9 +1,9 @@
 <template>
   <div
-    class="p-6 flex flex-col gap-4 w-full h-full max-h-full min-h-0 overflow-auto"
+    class="flex h-full max-h-full min-h-0 w-full flex-col gap-4 overflow-auto p-6"
   >
     <div v-if="author">
-      <h1 class="mb-2 font-semibold text-3xl capitalize">
+      <h1 class="mb-2 text-3xl font-semibold capitalize">
         {{ `${author.firstName} ${author.lastName}` }}
       </h1>
       <Inplace
@@ -34,7 +34,7 @@
         <template #content="{ closeCallback }">
           <form @submit.prevent="saveBio">
             <RichEditor v-model="editedBio" />
-            <div class="mt-2 flex gap-4 justify-end">
+            <div class="mt-2 flex justify-end gap-4">
               <Button
                 label="Save"
                 icon="pi pi-check"
@@ -55,7 +55,7 @@
     <div v-else class="flex justify-center">
       <ProgressSpinner />
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
       <PostDisplayCard v-for="post in posts" :post="post" :key="post.id" />
       <Paginator
         class="col-span-full"
